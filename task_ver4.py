@@ -36,12 +36,12 @@ def create_zip(tuple_ids, path, count_xmlfile, zip_no):
             z.writestr(file_name, stroka)
 
 
-# Parse zip-archive. Get id, level, options and write them into the csv-files.
+# Parse zip-archive. Get id, level, objects and write them into the csv-files.
 def parse_zip(lock, path, out_csv1, out_csv2, name_zip):
     with ZipFile(os.path.join(path, name_zip), 'r') as z:
         list_of_files_in_zip = z.namelist()
 
-        # parse zip file and get id, level, options values
+        # parse zip file and get id, level, objects values
         id_level_objects = []
         for fname in list_of_files_in_zip:
             list_of_object = []
@@ -54,7 +54,7 @@ def parse_zip(lock, path, out_csv1, out_csv2, name_zip):
                     list_of_object.append(string.split("object name='")[1].split("'")[0])
             id_level_objects.append([idp, level, list_of_object])
 
-        # write id, level. options into .csv-files
+        # write id, level, objects into .csv-files
         lock.acquire()
         with open(out_csv1, "a") as file1:
             for i in range(len(list_of_files_in_zip)):
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     p.join()
     print('Create .zip files time = {}s'.format(str(time() - t1)))
 
-    # Second task: grep id, level, options from .zip and write them to .csv files
+    # Second task: grep id, level, objects from .zip and write them to .csv files
     t1 = time()
     with open(out_csv1, "w") as file1:
         file1.write("id" + ',' + "level" + '\n')

@@ -63,12 +63,12 @@ class GetCsv(object):
         self.out_csv1 = os.path.join(self.path, 'csv1.csv')
         self.out_csv2 = os.path.join(self.path, 'csv2.csv')
 
-    # Parse zip-archive. Get id, level, options and write them into the csv-files.
+    # Parse zip-archive. Get id, level, objects and write them into the csv-files.
     def parse_zip(self, name_zip):
         with ZipFile(os.path.join(self.path, name_zip), 'r') as z:
             list_of_files_in_zip = z.namelist()
 
-            # parse zip file and get id, level, options values
+            # parse zip file and get id, level, objects values
             id_level_objects = []
             for fname in list_of_files_in_zip:
                 list_of_object = []
@@ -81,7 +81,7 @@ class GetCsv(object):
                         list_of_object.append(string.split("object name='")[1].split("'")[0])
                 id_level_objects.append([idp, level, list_of_object])
 
-            # write id, level. options into .csv-files
+            # write id, level, objects into .csv-files
             lock.acquire()
             with open(self.out_csv1, "a") as file1:
                 for i in range(len(list_of_files_in_zip)):
@@ -119,6 +119,6 @@ if __name__ == '__main__':
     A = GetZips(path)
     A.create_zips()
 
-    # Second task: grep id, level, options from .zip and write them to .csv files
+    # Second task: grep id, level, objects from .zip and write them to .csv files
     B = GetCsv(path)
     B.create_csv()

@@ -67,7 +67,7 @@ class GetCsv(object):
         self.path = path
         self.res = None
 
-    # Use cElementTree to parse zip-archive.  Get id, level, options and write them into the csv-files.
+    # Use cElementTree to parse zip-archive.  Get id, level, objects and write them into the csv-files.
     def parse_zip2(self, name_zip):
         with ZipFile(os.path.join(self.path, name_zip), 'r') as z:
             list_of_files_in_zip = z.namelist()
@@ -126,6 +126,6 @@ if __name__ == '__main__':
     A = GetZips(path)
     A.create_zips()
 
-    # Second task: grep id, level, options from .zip and write them to .csv files
+    # Second task: grep id, level, objects from .zip and write them to .csv files
     B = GetCsv(path)
     B.create_csv()
