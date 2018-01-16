@@ -61,12 +61,12 @@ class GetCsv(object):
         self.path = path
         self.res = None
 
-    # Parse zip-archive. Get id, level, options and write them into the csv-files.
+    # Parse zip-archive. Get id, level, objects and write them into the csv-files.
     def parse_zip(self, zip_name):
         with ZipFile(os.path.join(self.path, zip_name), 'r') as z:
             list_of_files_in_zip = z.namelist()
 
-            # Parse zip file and get id, level, options values
+            # Parse zip file and get id, level, objects values
             id_level_objects = []
             for fname in list_of_files_in_zip:
                 list_of_object = []
@@ -125,6 +125,6 @@ if __name__ == '__main__':
     A = GetZips(path)
     A.create_zips()
 
-    # Second task: grep id, level, options from .zip and write them to .csv files
+    # Second task: grep id, level, objects from .zip and write them to .csv files
     B = GetCsv(path)
     B.create_csv()
