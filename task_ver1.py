@@ -5,6 +5,7 @@ from random import choice, randint
 from string import ascii_letters
 from time import time
 from zipfile import ZipFile
+from sys import version as py_version
 
 
 class GetZips(object):
@@ -117,14 +118,17 @@ class GetCsv(object):
 
 
 if __name__ == '__main__':
-    path = ''
-    while os.path.exists(path) is False:
-        path = input("Input correct path to working directory, please\n")
+    if py_version[0] == '3':
+        path = ''
+        while os.path.exists(path) is False:
+            path = input("Input correct path to working directory, please\n")
 
-    # First task: create ZIPs archives with XML files
-    A = GetZips(path)
-    A.create_zips()
+        # First task: create ZIPs archives with XML files
+        A = GetZips(path)
+        A.create_zips()
 
-    # Second task: grep id, level, objects from .zip and write them to .csv files
-    B = GetCsv(path)
-    B.create_csv()
+        # Second task: grep id, level, objects from .zip and write them to .csv files
+        B = GetCsv(path)
+        B.create_csv()
+    else:
+        print("\n!!! Use Python3 instead Python2 to run the programm\n")
