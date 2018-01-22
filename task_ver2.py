@@ -22,7 +22,7 @@ class GetZips(object):
 
     # Get tuple of unique ids.
     def get_ids(self):
-        ids_count = self.count_zips * self.count_XMLfile  # Get count of files (ids)
+        ids_count = self.count_zips * self.count_XMLfile  # Get count of files
         set_for_find_repeat = set()  # The set is used for quick search
 
         # Get the set of unique ids
@@ -34,17 +34,21 @@ class GetZips(object):
 
     # Use cElementTree to write XML files in Zip archive
     def create_zip2(self, zip_no):
-        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'), 'w') as z:
+        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'), \
+                     'w') as z:
             for i in range(self.count_XMLfile):
                 file_name = 'XMLfile_' + str(zip_no) + '_' + str(i) + ".xml"
                 root = XmlTree.Element("root")
                 XmlTree.SubElement(root, "var name='id' value='{}'".format(
-                                         self.tuple_ids[zip_no * self.count_XMLfile + i]))
-                XmlTree.SubElement(root, "var name='level' value='{}'".format(randint(1, 100)))
+                                   self.tuple_ids[zip_no * self.count_XMLfile +
+                                   i]))
+                XmlTree.SubElement(root, "var name='level' value='{}'".format(
+                                   randint(1, 100)))
                 objects = XmlTree.SubElement(root, "objects")
                 for j in range(randint(1, 10)):
                     XmlTree.SubElement(objects, "object name='{}'".format(
-                        ''.join(choice(ascii_letters) for k in range(randint(5, 30)))))
+                        ''.join(choice(ascii_letters)
+                                for k in range(randint(5, 30)))))
                 xml_string = XmlTree.tostring(root).decode()
                 xml_prettyxml = minidom.parseString(xml_string).toprettyxml()
                 z.writestr(file_name, xml_prettyxml)
@@ -68,7 +72,8 @@ class GetCsv(object):
         self.path = path
         self.res = None
 
-    # Use cElementTree to parse zip-archive.  Get id, level, objects and write them into the csv-files.
+    # Use cElementTree to parse zip-archive.
+    # Get id, level, objects and write them into the csv-files.
     def parse_zip2(self, name_zip):
         with ZipFile(os.path.join(self.path, name_zip), 'r') as z:
             list_of_files_in_zip = z.namelist()
@@ -100,13 +105,15 @@ class GetCsv(object):
                 for obj in part[1]:
                     write_part += (part[0] + ',' + obj + '\n')
 
-        with open(os.path.join(self.path, 'csv'+str(q_nom)+ '.csv'), "w") as file:
+        with open(os.path.join(self.path, 'csv'+str(q_nom)+ '.csv'), "w") \
+                as file:
                 file.write(write_part)
 
     # create .csv files.
     def create_csv(self):
         t1 = time()
-        tuple_of_zips = (f for d, dirs, files in os.walk(self.path) for f in files if ".zip" in f)
+        tuple_of_zips = (f for d, dirs, files in os.walk(self.path)
+                         for f in files if ".zip" in f)
         p = Pool()
         self.res = p.map(self.parse_zip2, tuple_of_zips)
         p.close()
@@ -128,7 +135,7 @@ if __name__ == '__main__':
         A = GetZips(path)
         A.create_zips()
 
-        # Second task: grep id, level, objects from .zip and write them to .csv files
+        # Second task: get id, level, objects from .zip and write them to .csv
         B = GetCsv(path)
         B.create_csv()
     else:

@@ -20,7 +20,7 @@ class GetZips(object):
 
     # Get tuple of unique ids.
     def get_ids(self):
-        ids_count = self.count_zips * self.count_XMLfile  # Get count of files (ids)
+        ids_count = self.count_zips * self.count_XMLfile  # Get count of files
         set_for_find_repeat = set()  # The set is used for quick search
 
         # Get the set of unique ids
@@ -32,14 +32,18 @@ class GetZips(object):
 
     # Write XML files to Zip archive
     def create_zip(self, zip_no):
-        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'), 'w') as z:
+        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'),
+                     'w') as z:
             for i in range(self.count_XMLfile):
                 file_name = 'XMLfile_{}_{}.xml'.format( str(zip_no), str(i))
-                stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var name='level' value='%s'/> \n\t<objects>\n" \
-                         % (self.tuple_ids[zip_no*self.count_XMLfile+i], randint(1, 100))
+                stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var " \
+                         "name='level' value='%s'/> \n\t<objects>\n" \
+                         % (self.tuple_ids[zip_no*self.count_XMLfile+i],
+                            randint(1, 100))
                 for j in range(randint(1, 10)):
                     stroka += "\t\t<object name='%s'/>\n" % (
-                              ''.join(choice(ascii_letters) for k in range(randint(5, 30))))
+                              ''.join(choice(ascii_letters) for k in range(
+                                  randint(5, 30))))
                 stroka += "\t</objects>\n</root>"
                 z.writestr(file_name, stroka)
 
@@ -62,7 +66,7 @@ class GetCsv(object):
         self.path = path
         self.res = None
 
-    # Parse zip-archive. Get id, level, objects and write them into the csv-files.
+    # Parse zip-archive.  Get id, level, objects and write them into csv-files.
     def parse_zip(self, zip_name):
         with ZipFile(os.path.join(self.path, zip_name), 'r') as z:
             list_of_files_in_zip = z.namelist()
@@ -77,7 +81,8 @@ class GetCsv(object):
                     if "name='level'" in string:
                         level = string.split("'level' value='")[1].split("'")[0]
                     if "object name='" in string:
-                        list_of_object.append(string.split("object name='")[1].split("'")[0])
+                        list_of_object.append(string.split("object name='")[1].
+                                              split("'")[0])
                 id_level_objects.append((id, level, list_of_object))
 
         return id_level_objects
@@ -95,15 +100,16 @@ class GetCsv(object):
             for part in ((j[0], j[2]) for i in self.res for j in i):
                 for obj in part[1]:
                     write_part += (part[0] + ',' + obj + '\n')
-        #print('write_part=',write_part)
-        with open(os.path.join(self.path, 'csv' + str(q_nom) + '.csv'), "w") as file:
+        with open(os.path.join(self.path, 'csv' + str(q_nom) + '.csv'), "w") \
+                as file:
                 file.write(write_part)
 
     # create .csv files.
     def create_csv(self):
         t1 = time()
         # Get name of zip files
-        tuple_of_zips = (f for d, dirs, files in os.walk(self.path) for f in files if ".zip" in f)
+        tuple_of_zips = (f for d, dirs, files in os.walk(self.path)
+                         for f in files if ".zip" in f)
         # Parse zip filse
         p = Pool()
         self.res = p.map(self.parse_zip, tuple_of_zips)
@@ -127,7 +133,7 @@ if __name__ == '__main__':
         A = GetZips(path)
         A.create_zips()
 
-        # Second task: grep id, level, objects from .zip and write them to .csv files
+        # Second task: get id, level, objects from .zip and write them to .csv
         B = GetCsv(path)
         B.create_csv()
     else:

@@ -28,11 +28,13 @@ def create_zip(tuple_ids, path, count_xmlfile, zip_no):
     with ZipFile(os.path.join(path, 'Zip_' + str(zip_no) + '.zip'), 'w') as z:
         for i in range(count_xmlfile):
             file_name = 'XMLfile_' + str(zip_no) + '_' + str(i) + ".xml"
-            stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var name='level' value='%s'/> \n\t<objects>\n" \
+            stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var name=" \
+                     "'level' value='%s'/> \n\t<objects>\n" \
                      % (tuple_ids[zip_no*count_xmlfile+i], randint(1, 100))
             for j in range(randint(1, 10)):
                 stroka += "\t\t<object name='%s'/>\n" % (
-                          ''.join(choice(ascii_letters) for k in range(randint(5, 30))))
+                          ''.join(choice(ascii_letters) for k in range(
+                              randint(5, 30))))
             stroka += "\t</objects>\n</root>"
             z.writestr(file_name, stroka)
 
@@ -52,14 +54,16 @@ def parse_zip(lock, path, out_csv1, out_csv2, name_zip):
                 if "name='level'" in string:
                     level = string.split("'level' value='")[1].split("'")[0]
                 if "object name='" in string:
-                    list_of_object.append(string.split("object name='")[1].split("'")[0])
+                    list_of_object.append(string.split("object name='")[1].
+                                          split("'")[0])
             id_level_objects.append([idp, level, list_of_object])
 
         # write id, level, objects into .csv-files
         lock.acquire()
         with open(out_csv1, "a") as file1:
             for i in range(len(list_of_files_in_zip)):
-                file1.write(id_level_objects[i][0] + ',' + id_level_objects[i][1] + '\n')
+                file1.write(id_level_objects[i][0] + ','
+                            + id_level_objects[i][1] + '\n')
 
         with open(out_csv2, "a") as file2:
             for i in range(len(list_of_files_in_zip)):
@@ -88,13 +92,14 @@ if __name__ == '__main__':
         p.join()
         print('Create .zip files time = {}s'.format(str(time() - t1)))
 
-        # Second task: grep id, level, objects from .zip and write them to .csv files
+        # Second task: get id, level, objects from .zip and write them to .csv.
         t1 = time()
         with open(out_csv1, "w") as file1:
             file1.write("id" + ',' + "level" + '\n')
         with open(out_csv2, "w") as file2:
             file2.write("id" + ',' + "object_name" + '\n')
-        tuple_of_zips = (f for d, dirs, files in os.walk(path) for f in files if ".zip" in f)
+        tuple_of_zips = (f for d, dirs, files in os.walk(path)
+                         for f in files if ".zip" in f)
         lock = Lock()
         p = Pool()
         m = Manager()  # Manager is needed to distribute Lock to all processes
