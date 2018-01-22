@@ -27,14 +27,14 @@ class GetZips(object):
 
         # Get the set of unique ids
         while len(set_for_find_repeat) < ids_count:
-            id = ''.join(choice(ascii_letters) for i in range(15))
+            id = ''.join(choice(ascii_letters) for _ in range(15))
             if id not in set_for_find_repeat:
                 set_for_find_repeat.add(id)
         self.tuple_ids = tuple(set_for_find_repeat)
 
     # Use cElementTree to write XML files in Zip archive
     def create_zip2(self, zip_no):
-        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'), \
+        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'),
                      'w') as z:
             for i in range(self.count_XMLfile):
                 file_name = 'XMLfile_' + str(zip_no) + '_' + str(i) + ".xml"
@@ -48,7 +48,7 @@ class GetZips(object):
                 for j in range(randint(1, 10)):
                     XmlTree.SubElement(objects, "object name='{}'".format(
                         ''.join(choice(ascii_letters)
-                                for k in range(randint(5, 30)))))
+                                for _ in range(randint(5, 30)))))
                 xml_string = XmlTree.tostring(root).decode()
                 xml_prettyxml = minidom.parseString(xml_string).toprettyxml()
                 z.writestr(file_name, xml_prettyxml)
@@ -105,7 +105,7 @@ class GetCsv(object):
                 for obj in part[1]:
                     write_part += (part[0] + ',' + obj + '\n')
 
-        with open(os.path.join(self.path, 'csv'+str(q_nom)+ '.csv'), "w") \
+        with open(os.path.join(self.path, 'csv' + str(q_nom) + '.csv'), "w") \
                 as file:
                 file.write(write_part)
 
@@ -140,4 +140,3 @@ if __name__ == '__main__':
         B.create_csv()
     else:
         print("\n!!! Use Python3 instead Python2 to run the programm\n")
-

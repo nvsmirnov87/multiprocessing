@@ -17,7 +17,7 @@ def get_ids(count_zips, count_xmlfile):
 
     # Get the set of unique ids
     while len(set_for_find_repeat) < ids_count:
-        id = ''.join(choice(ascii_letters) for i in range(15))
+        id = ''.join(choice(ascii_letters) for _ in range(15))
         if id not in set_for_find_repeat:
             set_for_find_repeat.add(id)
     return tuple(set_for_find_repeat)
@@ -33,7 +33,7 @@ def create_zip(tuple_ids, path, count_xmlfile, zip_no):
                      % (tuple_ids[zip_no*count_xmlfile+i], randint(1, 100))
             for j in range(randint(1, 10)):
                 stroka += "\t\t<object name='%s'/>\n" % (
-                          ''.join(choice(ascii_letters) for k in range(
+                          ''.join(choice(ascii_letters) for _ in range(
                               randint(5, 30))))
             stroka += "\t</objects>\n</root>"
             z.writestr(file_name, stroka)
@@ -111,4 +111,3 @@ if __name__ == '__main__':
         print('Create .csv files time = {}s'.format(str(time() - t1)))
     else:
         print("\n!!! Use Python3 instead Python2 to run the programm\n")
-

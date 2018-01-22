@@ -26,7 +26,7 @@ class GetZips(object):
 
         # Get the set of unique ids
         while len(set_for_find_repeat) < ids_count:
-            id = ''.join(choice(ascii_letters) for i in range(15))
+            id = ''.join(choice(ascii_letters) for _ in range(15))
             if id not in set_for_find_repeat:
                 set_for_find_repeat.add(id)
         self.tuple_ids = tuple(set_for_find_repeat)
@@ -44,7 +44,7 @@ class GetZips(object):
                 for j in range(randint(1, 10)):
                     stroka += "\t\t<object name='%s'/>\n" % (
                               ''.join(choice(ascii_letters)
-                                      for k in range(randint(5, 30))))
+                                      for _ in range(randint(5, 30))))
                 stroka += "\t</objects>\n</root>"
                 z.writestr(file_name, stroka)
 
@@ -100,7 +100,6 @@ class GetCsv(object):
                         file2.write(id_level_objects[i][0] + ',' + my_object +
                                     '\n')
             lock.release()
-
 
     # create .csv files.
     def create_csv(self):

@@ -25,7 +25,7 @@ class GetZips(object):
 
         # Get the set of unique ids
         while len(set_for_find_repeat) < ids_count:
-            id = ''.join(choice(ascii_letters) for i in range(15))
+            id = ''.join(choice(ascii_letters) for _ in range(15))
             if id not in set_for_find_repeat:
                 set_for_find_repeat.add(id)
         self.tuple_ids = tuple(set_for_find_repeat)
@@ -35,14 +35,14 @@ class GetZips(object):
         with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'),
                      'w') as z:
             for i in range(self.count_XMLfile):
-                file_name = 'XMLfile_{}_{}.xml'.format( str(zip_no), str(i))
+                file_name = 'XMLfile_{}_{}.xml'.format(str(zip_no), str(i))
                 stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var " \
                          "name='level' value='%s'/> \n\t<objects>\n" \
                          % (self.tuple_ids[zip_no*self.count_XMLfile+i],
                             randint(1, 100))
                 for j in range(randint(1, 10)):
                     stroka += "\t\t<object name='%s'/>\n" % (
-                              ''.join(choice(ascii_letters) for k in range(
+                              ''.join(choice(ascii_letters) for _ in range(
                                   randint(5, 30))))
                 stroka += "\t</objects>\n</root>"
                 z.writestr(file_name, stroka)
