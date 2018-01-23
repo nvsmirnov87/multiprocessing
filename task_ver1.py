@@ -25,7 +25,7 @@ class GetZips(object):
 
         # Get the set of unique ids
         while len(set_for_find_repeat) < ids_count:
-            id = ''.join(choice(ascii_letters) for _ in range(15))
+            id = ''.join(choice(ascii_letters) for __ in range(15))
             if id not in set_for_find_repeat:
                 set_for_find_repeat.add(id)
         self.tuple_ids = tuple(set_for_find_repeat)
@@ -42,7 +42,7 @@ class GetZips(object):
                             randint(1, 100))
                 for j in range(randint(1, 10)):
                     stroka += "\t\t<object name='%s'/>\n" % (
-                              ''.join(choice(ascii_letters) for _ in range(
+                              ''.join(choice(ascii_letters) for __ in range(
                                   randint(5, 30))))
                 stroka += "\t</objects>\n</root>"
                 z.writestr(file_name, stroka)
