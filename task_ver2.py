@@ -7,7 +7,8 @@ from time import time
 from zipfile import ZipFile
 import xml.etree.cElementTree as XmlTree
 from xml.dom import minidom
-from sys import version as py_version
+from sys import version as py_version, exit as err_exit
+import uuid
 
 
 class GetZips(object):
@@ -23,14 +24,11 @@ class GetZips(object):
     # Get tuple of unique ids.
     def get_ids(self):
         ids_count = self.count_zips * self.count_XMLfile  # Get count of files
-        set_for_find_repeat = set()  # The set is used for quick search
-
+        list_ids = list()
         # Get the set of unique ids
-        while len(set_for_find_repeat) < ids_count:
-            id = ''.join(choice(ascii_letters) for _ in range(15))
-            if id not in set_for_find_repeat:
-                set_for_find_repeat.add(id)
-        self.tuple_ids = tuple(set_for_find_repeat)
+        for _ in range(ids_count):
+            list_ids.append(uuid.uuid4().hex)
+        self.tuple_ids = tuple(list_ids)
 
     # Use cElementTree to write XML files in Zip archive
     def create_zip2(self, zip_no):
@@ -72,8 +70,7 @@ class GetCsv(object):
         self.path = path
         self.res = None
 
-    # Use cElementTree to parse zip-archive.
-    # Get id, level, objects and write them into the csv-files.
+    # Use cElementTree to parse zip-archive. Get id, level, objects
     def parse_zip2(self, name_zip):
         with ZipFile(os.path.join(self.path, name_zip), 'r') as z:
             list_of_files_in_zip = z.namelist()
@@ -126,17 +123,17 @@ class GetCsv(object):
 
 
 if __name__ == '__main__':
-    if py_version[0] == '3':
-        path = ''
-        while os.path.exists(path) is False:
-            path = input("Input correct path to working directory, please\n")
+    if py_version[0] != '3':
+        err_exit('!!! Use Python3 instead Python2 to run the programm')
 
-        # First task: create ZIPs archives with XML files
-        A = GetZips(path)
-        A.create_zips()
+    path = ''
+    while os.path.exists(path) is False:
+        path = input("Input correct path to working directory, please\n")
 
-        # Second task: get id, level, objects from .zip and write them to .csv
-        B = GetCsv(path)
-        B.create_csv()
-    else:
-        print("\n!!! Use Python3 instead Python2 to run the programm\n")
+    # First task: create ZIPs archives with XML files
+    A = GetZips(path)
+    A.create_zips()
+
+    # Second task: get id, level, objects from .zip and write them to .csv
+    B = GetCsv(path)
+    B.create_csv()

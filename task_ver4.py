@@ -7,36 +7,42 @@ from string import ascii_letters
 from time import time
 from zipfile import ZipFile
 from functools import partial
-from sys import version as py_version
+from sys import version as py_version, exit as err_exit
+import uuid
 
 
 # Get tuple of unique ids.
 def get_ids(count_zips, count_xmlfile):
     ids_count = count_zips * count_xmlfile  # Get count of files (ids)
-    set_for_find_repeat = set()  # The set is used for quick search
-
+    list_ids = list()
     # Get the set of unique ids
-    while len(set_for_find_repeat) < ids_count:
-        id = ''.join(choice(ascii_letters) for _ in range(15))
-        if id not in set_for_find_repeat:
-            set_for_find_repeat.add(id)
-    return tuple(set_for_find_repeat)
+    for _ in range(ids_count):
+        list_ids.append(uuid.uuid4().hex)
+    tuple_ids = tuple(list_ids)
+    return tuple_ids
 
 
 # Write XML files to Zip archive
 def create_zip(tuple_ids, path, count_xmlfile, zip_no):
     with ZipFile(os.path.join(path, 'Zip_' + str(zip_no) + '.zip'), 'w') as z:
         for i in range(count_xmlfile):
-            file_name = 'XMLfile_' + str(zip_no) + '_' + str(i) + ".xml"
-            stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var name=" \
-                     "'level' value='%s'/> \n\t<objects>\n" \
-                     % (tuple_ids[zip_no*count_xmlfile+i], randint(1, 100))
+            file_name = 'XMLfile_{}_{}.xml'.format(str(zip_no), str(i))
+            list_str = list()
+            list_str.append("<root>")
+            list_str.append("\t<var name='id' value='{}'/>".format(
+                tuple_ids[zip_no * count_xmlfile + i]))
+            list_str.append("\t<var name='level' value='{}'/> ".
+                            format(randint(1, 100)))
+            list_str.append("\t<objects>")
+
             for j in range(randint(1, 10)):
-                stroka += "\t\t<object name='%s'/>\n" % (
-                          ''.join(choice(ascii_letters) for _ in range(
-                              randint(5, 30))))
-            stroka += "\t</objects>\n</root>"
-            z.writestr(file_name, stroka)
+                list_str.append("\t\t<object name='{}'/>".format(
+                    ''.join(choice(ascii_letters) for _ in range(
+                        randint(5, 30)))))
+            list_str.append("\t</objects>")
+            list_str.append("</root>")
+            xml_file = "\n".join((_ for _ in list_str))
+            z.writestr(file_name, xml_file)
 
 
 # Parse zip-archive. Get id, level, objects and write them into the csv-files.
@@ -73,41 +79,42 @@ def parse_zip(lock, path, out_csv1, out_csv2, name_zip):
 
 
 if __name__ == '__main__':
-    if py_version[0] == '3':
-        path = ''
-        while os.path.exists(path) is False:
-            path = input("Input correct path to working directory, please\n")
-        out_csv1 = os.path.join(path, 'csv1.csv')
-        out_csv2 = os.path.join(path, 'csv2.csv')
+    if py_version[0] != '3':
+        err_exit('!!! Use Python3 instead Python2 to run the programm')
 
-        # First task: create ZIPs archives with XML files
-        t1 = time()
-        count_zips = 50
-        count_xmlfile = 100
-        tuple_ids = get_ids(count_zips, count_xmlfile)  # get list of string id
-        func = partial(create_zip, tuple_ids, path, count_xmlfile)
-        p = Pool()
-        p.imap_unordered(func, range(count_zips))
-        p.close()
-        p.join()
-        print('Create .zip files time = {}s'.format(str(time() - t1)))
+    path = ''
+    while os.path.exists(path) is False:
+        path = input("Input correct path to working directory, please\n")
 
-        # Second task: get id, level, objects from .zip and write them to .csv.
-        t1 = time()
-        with open(out_csv1, "w") as file1:
-            file1.write("id" + ',' + "level" + '\n')
-        with open(out_csv2, "w") as file2:
-            file2.write("id" + ',' + "object_name" + '\n')
-        tuple_of_zips = (f for d, dirs, files in os.walk(path)
-                         for f in files if ".zip" in f)
-        lock = Lock()
-        p = Pool()
-        m = Manager()  # Manager is needed to distribute Lock to all processes
-        lock = m.Lock()
-        func = partial(parse_zip, lock, path, out_csv1, out_csv2)
-        p.imap_unordered(func, tuple_of_zips)
-        p.close()
-        p.join()
-        print('Create .csv files time = {}s'.format(str(time() - t1)))
-    else:
-        print("\n!!! Use Python3 instead Python2 to run the programm\n")
+    out_csv1 = os.path.join(path, 'csv1.csv')
+    out_csv2 = os.path.join(path, 'csv2.csv')
+    count_zips = 50
+    count_xmlfile = 100
+
+    # First task: create ZIPs archives with XML files
+    t1 = time()
+    tuple_ids = get_ids(count_zips, count_xmlfile)  # get list of string id
+    func = partial(create_zip, tuple_ids, path, count_xmlfile)
+    p = Pool()
+    p.imap_unordered(func, range(count_zips))
+    p.close()
+    p.join()
+    print('Create .zip files time = {}s'.format(str(time() - t1)))
+
+    # Second task: get id, level, objects from .zip and write them to .csv.
+    t1 = time()
+    with open(out_csv1, "w") as file1:
+        file1.write("id,level\n")
+    with open(out_csv2, "w") as file2:
+        file2.write("id,object_name\n")
+    tuple_of_zips = (f for d, dirs, files in os.walk(path)
+                        for f in files if ".zip" in f)
+    lock = Lock()
+    p = Pool()
+    m = Manager()  # Manager is needed to distribute Lock to all processes
+    lock = m.Lock()
+    func = partial(parse_zip, lock, path, out_csv1, out_csv2)
+    p.imap_unordered(func, tuple_of_zips)
+    p.close()
+    p.join()
+    print('Create .csv files time = {}s'.format(str(time() - t1)))

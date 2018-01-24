@@ -5,7 +5,8 @@ from random import choice, randint
 from string import ascii_letters
 from time import time
 from zipfile import ZipFile
-from sys import version as py_version
+from sys import version as py_version, exit as err_exit
+import uuid
 
 
 class GetZips(object):
@@ -15,37 +16,40 @@ class GetZips(object):
     def __init__(self, path):
         self.count_zips = 50
         self.count_XMLfile = 100
-        self.tuple_ids = ()
+        self.tuple_ids = None
         self.path = path
 
     # Get tuple of unique ids.
     def get_ids(self):
         ids_count = self.count_zips * self.count_XMLfile  # Get count of files
-        set_for_find_repeat = set()  # The set is used for quick search
-
+        list_ids = list()
         # Get the set of unique ids
-        while len(set_for_find_repeat) < ids_count:
-            id = ''.join(choice(ascii_letters) for _ in range(15))
-            if id not in set_for_find_repeat:
-                set_for_find_repeat.add(id)
-        self.tuple_ids = tuple(set_for_find_repeat)
+        for _ in range(ids_count):
+            list_ids.append(uuid.uuid4().hex)
+        self.tuple_ids = tuple(list_ids)
 
     # Write XML files to Zip archive
     def create_zip(self, zip_no):
-        with ZipFile(os.path.join(self.path, 'Zip_' + str(zip_no) + '.zip'),
+        with ZipFile(os.path.join(self.path, 'Zip_{}.zip'.format(zip_no)),
                      'w') as z:
             for i in range(self.count_XMLfile):
                 file_name = 'XMLfile_{}_{}.xml'.format(str(zip_no), str(i))
-                stroka = "<root>\n\t<var name='id' value='%s'/>\n\t<var " \
-                         "name='level' value='%s'/> \n\t<objects>\n" \
-                         % (self.tuple_ids[zip_no*self.count_XMLfile+i],
-                            randint(1, 100))
+                list_str = list()
+                list_str.append("<root>")
+                list_str.append("\t<var name='id' value='{}'/>".format(
+                    self.tuple_ids[zip_no * self.count_XMLfile + i]))
+                list_str.append("\t<var name='level' value='{}'/> ".
+                                format(randint(1, 100)))
+                list_str.append("\t<objects>")
+
                 for j in range(randint(1, 10)):
-                    stroka += "\t\t<object name='%s'/>\n" % (
-                              ''.join(choice(ascii_letters) for _ in range(
-                                  randint(5, 30))))
-                stroka += "\t</objects>\n</root>"
-                z.writestr(file_name, stroka)
+                    list_str.append("\t\t<object name='{}'/>".format(
+                        ''.join(choice(ascii_letters) for _ in range(
+                                  randint(5, 30)))))
+                list_str.append("\t</objects>")
+                list_str.append("</root>")
+                xml_file = "\n".join((_ for _ in list_str))
+                z.writestr(file_name, xml_file)
 
     # Start function.  Pool of processes for creating Zip archives.
     def create_zips(self):
@@ -74,7 +78,7 @@ class GetCsv(object):
             # Parse zip file and get id, level, objects values
             id_level_objects = []
             for fname in list_of_files_in_zip:
-                list_of_object = []
+                list_of_object = list()
                 for string in z.read(fname).decode("utf-8").split('\n'):
                     if "name='id'" in string:
                         id = string.split("id' value='")[1].split("'")[0]
@@ -124,17 +128,17 @@ class GetCsv(object):
 
 
 if __name__ == '__main__':
-    if py_version[0] == '3':
-        path = ''
-        while os.path.exists(path) is False:
-            path = input("Input correct path to working directory, please\n")
+    if py_version[0] != '3':
+        err_exit('!!! Use Python3 instead Python2 to run the programm')
 
-        # First task: create ZIPs archives with XML files
-        A = GetZips(path)
-        A.create_zips()
+    path = ''
+    while os.path.exists(path) is False:
+        path = input("Input correct path to working directory, please\n")
 
-        # Second task: get id, level, objects from .zip and write them to .csv
-        B = GetCsv(path)
-        B.create_csv()
-    else:
-        print("\n!!! Use Python3 instead Python2 to run the programm\n")
+    # First task: create ZIPs archives with XML files
+    A = GetZips(path)
+    A.create_zips()
+
+    # Second task: get id, level, objects from .zip and write them to .csv
+    B = GetCsv(path)
+    B.create_csv()
